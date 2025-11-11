@@ -1,10 +1,6 @@
 <?php
 namespace Custom\Curator;
 
-use Bitrix\Main\Loader;
-
-Loader::includeModule('tasks');
-
 class EventHandlers
 {
     public static function OnBeforeTaskAdd(&$arFields)
@@ -54,32 +50,6 @@ class EventHandlers
 
             unset($arFields['CURATOR_ID']);
         }
-    }
-
-    public static function OnRestRegister()
-    {
-        return array(
-            'curator.add' => array(
-                '\\Custom\\Curator\\Rest\\CuratorRest',
-                'add'
-            ),
-            'curator.remove' => array(
-                '\\Custom\\Curator\\Rest\\CuratorRest',
-                'remove'
-            ),
-            'curator.list' => array(
-                '\\Custom\\Curator\\Rest\\CuratorRest',
-                'list'
-            ),
-            'curator.gettasks' => array(
-                '\\Custom\\Curator\\Rest\\CuratorRest',
-                'gettasks'
-            ),
-            'curator.check' => array(
-                '\\Custom\\Curator\\Rest\\CuratorRest',
-                'check'
-            ),
-        );
     }
 }
 ?>

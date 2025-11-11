@@ -4,7 +4,6 @@ class CuratorSelector {
         this.el = document.getElementById(this.options.el);
         this.taskId = this.options.taskId;
         this.selectedCurators = [];
-        this.userCache = {};
 
         this.init();
     }
@@ -14,7 +13,9 @@ class CuratorSelector {
 
         this.createUI();
         this.attachEvents();
-        this.loadCurators();
+        if (this.taskId) {
+            this.loadCurators();
+        }
     }
 
     createUI() {
@@ -23,7 +24,7 @@ class CuratorSelector {
                 <div class="curator-input-wrapper">
                     <input type="text" 
                            class="curator-search" 
-                           placeholder="Начните вводить имя сотрудника...">
+                           placeholder="Введите имя сотрудника...">
                     <div class="curator-dropdown" style="display:none;"></div>
                 </div>
                 <div class="curator-list"></div>
@@ -65,16 +66,25 @@ class CuratorSelector {
     }
 
     fetchUsers(query) {
-        BX.ajax.runComponentAction('bitrix:intranet.user.selector.new', 'load', {
-            mode: 'class',
-            data: {
-                search: query
+        if (typeof BX === 'undefined' || !BX.rest) {
+            console.error('BX.rest API not available');
+            return;
+        }
+
+        BX.rest.callMethod('user.get', {
+            filter: {
+                SEARCH: query,
+                ACTIVE: 'Y'
+            },
+            select: ['ID', 'NAME', 'LAST_NAME', 'EMAIL']
+        }, (result) => {
+            if (result.error()) {
+                console.error('Error fetching users:', result.error());
+                return;
             }
-        }).then(function(response) {
-            if (response.status === 'success') {
-                this.showDropdown(response.data.users || []);
-            }
-        }.bind(this));
+
+            this.showDropdown(result.data());
+        });
     }
 
     showDropdown(users) {
@@ -87,22 +97,22 @@ class CuratorSelector {
         }
 
         users.forEach(user => {
-            if (this.selectedCurators.some(c => c.id == user.id)) {
+            if (this.selectedCurators.some(c => c.id == user.ID)) {
                 return;
             }
 
             const item = document.createElement('div');
             item.className = 'curator-dropdown-item';
             item.innerHTML = `
-                <span class="curator-name">${user.name} ${user.lastName}</span>
-                <span class="curator-email">${user.email || ''}</span>
+                <span class="curator-name">${user.NAME} ${user.LAST_NAME}</span>
+                <span class="curator-email">${user.EMAIL || ''}</span>
             `;
 
             item.addEventListener('click', () => {
                 this.selectCurator({
-                    id: user.id,
-                    name: user.name + ' ' + user.lastName,
-                    email: user.email
+                    id: user.ID,
+                    name: user.NAME + ' ' + user.LAST_NAME,
+                    email: user.EMAIL
                 });
             });
 
@@ -158,53 +168,65 @@ class CuratorSelector {
     }
 
     saveCurator(userId) {
-        if (!this.taskId) return;
+        if (!this.taskId || !BX.rest) return;
 
-        BX.ajax.runAction('custom.curator:curator.add', {
-            data: {
-                taskId: this.taskId,
-                userId: userId
-            }
+        BX.rest.callMethod('custom.curator.add', {
+            taskId: this.taskId,
+            userId: userId
         });
     }
 
     removeCuratorFromServer(userId) {
-        if (!this.taskId) return;
+        if (!this.taskId || !BX.rest) return;
 
-        BX.ajax.runAction('custom.curator:curator.remove', {
-            data: {
-                taskId: this.taskId,
-                userId: userId
-            }
+        BX.rest.callMethod('custom.curator.remove', {
+            taskId: this.taskId,
+            userId: userId
         });
     }
 
     loadCurators() {
-        if (!this.taskId) return;
+        if (!this.taskId || !BX.rest) return;
 
-        BX.ajax.runAction('custom.curator:curator.list', {
-            data: {
-                taskId: this.taskId
+        BX.rest.callMethod('custom.curator.list', {
+            taskId: this.taskId
+        }, (result) => {
+            if (result.error()) {
+                console.error('Error loading curators:', result.error());
+                return;
             }
-        }).then(function(response) {
-            if (response.status === 'success' && response.data) {
-                const userIds = response.data.map(c => c.USER_ID);
+
+            const curators = result.data();
+            if (curators && curators.length > 0) {
+                const userIds = curators.map(c => c.USER_ID);
                 this.fetchUserDetails(userIds);
             }
-        }.bind(this));
+        });
     }
 
     fetchUserDetails(userIds) {
-        // Загрузка данных пользователей
-        userIds.forEach(userId => {
-            this.selectedCurators.push({
-                id: userId,
-                name: 'User ' + userId,
-                email: ''
-            });
-        });
+        if (!BX.rest) return;
 
-        this.renderCurators();
+        BX.rest.callMethod('user.get', {
+            filter: { ID: userIds }
+        }, (result) => {
+            if (result.error()) {
+                console.error('Error loading user details:', result.error());
+                return;
+            }
+
+            result.data().forEach(user => {
+                if (!this.selectedCurators.some(c => c.id === user.ID)) {
+                    this.selectedCurators.push({
+                        id: user.ID,
+                        name: user.NAME + ' ' + user.LAST_NAME,
+                        email: user.EMAIL
+                    });
+                }
+            });
+
+            this.renderCurators();
+        });
     }
 }
 

@@ -78,23 +78,24 @@
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
+    margin-top: 8px;
 }
 
 .curator-tag {
     display: inline-flex;
     align-items: center;
-    background-color: #e3f2fd;
-    border: 1px solid #90caf9;
+    background-color: #fff3e0;
+    border: 1px solid #ffe0b2;
     border-radius: 20px;
     padding: 6px 12px;
     font-size: 13px;
-    color: #1976d2;
+    color: #ff9800;
 }
 
 .curator-remove {
     background: none;
     border: none;
-    color: #1976d2;
+    color: #ff9800;
     font-size: 18px;
     line-height: 1;
     margin-left: 6px;
@@ -104,5 +105,5 @@
 }
 
 .curator-remove:hover {
-    color: #0d47a1;
+    color: #e65100;
 }

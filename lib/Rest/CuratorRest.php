@@ -2,15 +2,17 @@
 namespace Custom\Curator\Rest;
 
 use Custom\Curator\Curator;
-use Bitrix\Main\Engine\Controller;
 
-class CuratorRest extends Controller
+class CuratorRest
 {
-    public function addAction($taskId, $userId)
+    public static function add($taskId, $userId)
     {
         try {
             if (!$taskId || !$userId) {
-                throw new \Exception("Не указаны обязательные параметры");
+                return array(
+                    'status' => 'error',
+                    'message' => 'Не указаны обязательные параметры'
+                );
             }
 
             Curator::addCurator($taskId, $userId);
@@ -31,11 +33,14 @@ class CuratorRest extends Controller
         }
     }
 
-    public function removeAction($taskId, $userId)
+    public static function remove($taskId, $userId)
     {
         try {
             if (!$taskId || !$userId) {
-                throw new \Exception("Не указаны обязательные параметры");
+                return array(
+                    'status' => 'error',
+                    'message' => 'Не указаны обязательные параметры'
+                );
             }
 
             Curator::removeCurator($taskId, $userId);
@@ -52,7 +57,7 @@ class CuratorRest extends Controller
         }
     }
 
-    public function listAction($taskId)
+    public static function getCuratorList($taskId)
     {
         try {
             $curators = Curator::getCurators($taskId);
@@ -70,7 +75,7 @@ class CuratorRest extends Controller
         }
     }
 
-    public function gettasksAction($userId)
+    public static function getUserTasks($userId)
     {
         try {
             $tasks = Curator::getUserTasks($userId, 'curator');
@@ -97,7 +102,7 @@ class CuratorRest extends Controller
         }
     }
 
-    public function checkAction($taskId, $userId)
+    public static function checkCurator($taskId, $userId)
     {
         try {
             $isCurator = Curator::isCurator($taskId, $userId);

@@ -1,8 +1,10 @@
 <?php
 if (!defined("B_PROLOG_INCLUDED") || B_PROLOG_INCLUDED !== true) die();
 
-// Подключаем автозагрузку классов
-Bitrix\Main\Loader::registerAutoLoadClasses(
+use Bitrix\Main\Loader;
+
+// Регистрируем автозагрузку классов модуля
+Loader::registerAutoLoadClasses(
     'custom.curator',
     array(
         '\Custom\Curator\Curator' => 'lib/Curator.php',

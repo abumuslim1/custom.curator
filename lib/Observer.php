@@ -10,10 +10,7 @@ class Observer
 
     public static function canComment($taskId, $userId)
     {
-        if (Curator::isCurator($taskId, $userId)) {
-            return true;
-        }
-        return false;
+        return Curator::isCurator($taskId, $userId) ? true : false;
     }
 
     public static function canEdit($taskId, $userId)

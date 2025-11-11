@@ -1,8 +1,6 @@
 <?php
 namespace Custom\Curator;
 
-use Bitrix\Main\Loader;
-
 class Curator
 {
     const TYPE_CURATOR = 'CURATOR';
