@@ -60,24 +60,24 @@ class EventHandlers
     {
         return array(
             'curator.add' => array(
-                'class_name' => '\\Custom\\Curator\\Rest\\CuratorRest',
-                'method_name' => 'add',
+                '\\Custom\\Curator\\Rest\\CuratorRest',
+                'add'
             ),
             'curator.remove' => array(
-                'class_name' => '\\Custom\\Curator\\Rest\\CuratorRest',
-                'method_name' => 'remove',
+                '\\Custom\\Curator\\Rest\\CuratorRest',
+                'remove'
             ),
             'curator.list' => array(
-                'class_name' => '\\Custom\\Curator\\Rest\\CuratorRest',
-                'method_name' => 'list',
+                '\\Custom\\Curator\\Rest\\CuratorRest',
+                'list'
             ),
             'curator.gettasks' => array(
-                'class_name' => '\\Custom\\Curator\\Rest\\CuratorRest',
-                'method_name' => 'gettasks',
+                '\\Custom\\Curator\\Rest\\CuratorRest',
+                'gettasks'
             ),
             'curator.check' => array(
-                'class_name' => '\\Custom\\Curator\\Rest\\CuratorRest',
-                'method_name' => 'check',
+                '\\Custom\\Curator\\Rest\\CuratorRest',
+                'check'
             ),
         );
     }

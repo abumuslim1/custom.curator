@@ -27,7 +27,6 @@ class Curator
             ON DUPLICATE KEY UPDATE CREATED_BY = " . intval($createdBy) . ", DATE_CREATE = NOW()
         ";
 
-        global $DB;
         return $DB->Query($sql);
     }
 

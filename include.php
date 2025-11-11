@@ -1,8 +1,14 @@
 <?php
 if (!defined("B_PROLOG_INCLUDED") || B_PROLOG_INCLUDED !== true) die();
 
-CModule::AddModuleInstallFile(__FILE__, array(
-    "CLASS_NAME" => "custom_curator",
-    "DESCRIPTION" => "Модуль для добавления роли Куратор в задачи"
-));
+// Подключаем автозагрузку классов
+Bitrix\Main\Loader::registerAutoLoadClasses(
+    'custom.curator',
+    array(
+        '\Custom\Curator\Curator' => 'lib/Curator.php',
+        '\Custom\Curator\Observer' => 'lib/Observer.php',
+        '\Custom\Curator\EventHandlers' => 'lib/EventHandlers.php',
+        '\Custom\Curator\Rest\CuratorRest' => 'lib/Rest/CuratorRest.php',
+    )
+);
 ?>

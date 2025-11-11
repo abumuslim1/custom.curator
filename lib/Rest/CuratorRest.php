@@ -2,20 +2,10 @@
 namespace Custom\Curator\Rest;
 
 use Custom\Curator\Curator;
-use Bitrix\Main\Engine\ActionFilter;
 use Bitrix\Main\Engine\Controller;
 
 class CuratorRest extends Controller
 {
-    protected function getDefaultPreFilters()
-    {
-        return array(
-            new ActionFilter\Authentication(),
-            new ActionFilter\HttpMethod(array(ActionFilter\HttpMethod::METHOD_POST)),
-            new ActionFilter\Cors(array('*')),
-        );
-    }
-
     public function addAction($taskId, $userId)
     {
         try {

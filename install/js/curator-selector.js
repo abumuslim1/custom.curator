@@ -65,20 +65,16 @@ class CuratorSelector {
     }
 
     fetchUsers(query) {
-        BX.rest.callMethod('user.get', {
-            filter: {
-                'SEARCH': query,
-                'ACTIVE': 'Y'
-            },
-            select: ['ID', 'NAME', 'LAST_NAME', 'EMAIL', 'PERSONAL_PHOTO']
-        }, (result) => {
-            if (result.error()) {
-                console.error('Error fetching users:', result.error());
-                return;
+        BX.ajax.runComponentAction('bitrix:intranet.user.selector.new', 'load', {
+            mode: 'class',
+            data: {
+                search: query
             }
-
-            this.showDropdown(result.data());
-        });
+        }).then(function(response) {
+            if (response.status === 'success') {
+                this.showDropdown(response.data.users || []);
+            }
+        }.bind(this));
     }
 
     showDropdown(users) {
@@ -91,22 +87,22 @@ class CuratorSelector {
         }
 
         users.forEach(user => {
-            if (this.selectedCurators.some(c => c.id == user.ID)) {
+            if (this.selectedCurators.some(c => c.id == user.id)) {
                 return;
             }
 
             const item = document.createElement('div');
             item.className = 'curator-dropdown-item';
             item.innerHTML = `
-                <span class="curator-name">${user.NAME} ${user.LAST_NAME}</span>
-                <span class="curator-email">${user.EMAIL}</span>
+                <span class="curator-name">${user.name} ${user.lastName}</span>
+                <span class="curator-email">${user.email || ''}</span>
             `;
 
             item.addEventListener('click', () => {
                 this.selectCurator({
-                    id: user.ID,
-                    name: user.NAME + ' ' + user.LAST_NAME,
-                    email: user.EMAIL
+                    id: user.id,
+                    name: user.name + ' ' + user.lastName,
+                    email: user.email
                 });
             });
 
@@ -164,12 +160,10 @@ class CuratorSelector {
     saveCurator(userId) {
         if (!this.taskId) return;
 
-        BX.rest.callMethod('curator.add', {
-            taskId: this.taskId,
-            userId: userId
-        }, (result) => {
-            if (result.error()) {
-                console.error('Error saving curator:', result.error());
+        BX.ajax.runAction('custom.curator:curator.add', {
+            data: {
+                taskId: this.taskId,
+                userId: userId
             }
         });
     }
@@ -177,12 +171,10 @@ class CuratorSelector {
     removeCuratorFromServer(userId) {
         if (!this.taskId) return;
 
-        BX.rest.callMethod('curator.remove', {
-            taskId: this.taskId,
-            userId: userId
-        }, (result) => {
-            if (result.error()) {
-                console.error('Error removing curator:', result.error());
+        BX.ajax.runAction('custom.curator:curator.remove', {
+            data: {
+                taskId: this.taskId,
+                userId: userId
             }
         });
     }
@@ -190,41 +182,29 @@ class CuratorSelector {
     loadCurators() {
         if (!this.taskId) return;
 
-        BX.rest.callMethod('curator.list', {
-            taskId: this.taskId
-        }, (result) => {
-            if (result.error()) {
-                console.error('Error loading curators:', result.error());
-                return;
+        BX.ajax.runAction('custom.curator:curator.list', {
+            data: {
+                taskId: this.taskId
             }
-
-            const curators = result.data();
-            if (curators && curators.length > 0) {
-                const userIds = curators.map(c => c.USER_ID);
+        }).then(function(response) {
+            if (response.status === 'success' && response.data) {
+                const userIds = response.data.map(c => c.USER_ID);
                 this.fetchUserDetails(userIds);
             }
-        });
+        }.bind(this));
     }
 
     fetchUserDetails(userIds) {
-        BX.rest.callMethod('user.get', {
-            filter: { 'ID': userIds }
-        }, (result) => {
-            if (result.error()) {
-                console.error('Error fetching curator details:', result.error());
-                return;
-            }
-
-            result.data().forEach(user => {
-                this.selectedCurators.push({
-                    id: user.ID,
-                    name: user.NAME + ' ' + user.LAST_NAME,
-                    email: user.EMAIL
-                });
+        // Загрузка данных пользователей
+        userIds.forEach(userId => {
+            this.selectedCurators.push({
+                id: userId,
+                name: 'User ' + userId,
+                email: ''
             });
-
-            this.renderCurators();
         });
+
+        this.renderCurators();
     }
 }
 
